@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Dark Forest RPG</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  image-rendering: pixelated;
+  font-family: monospace;
+}
+
+canvas {
+  display: block;
+  margin: auto;
+  background: #0b120b;
+}
+
+/* HUD */
+#hud {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: #ddd;
+  font-size: 14px;
+  line-height: 1.4;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game" width="640" height="480"></canvas>
+
+<div id="hud">
+  ❤️ Vida: <span id="hp">100</span><br>
+  ⚡ Stamina: <span id="stamina">100</span><br>
+  🪵 Madeira: <span id="wood">0</span><br>
+  🌿 Ervas: <span id="herbs">0</span><br>
+  ⚔ Classe: <span id="playerClass">Indefinido</span>
+</div>
+
+<script>
+// =======================
+// CANVAS
+// =======================
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+// =======================
+// HUD ELEMENTS (CORRIGIDO)
+// =======================
+const hpEl = document.getElementById("hp");
+const staminaEl = document.getElementById("stamina");
+const woodEl = document.getElementById("wood");
+const herbsEl = document.getElementById("herbs");
+const classEl = document.getElementById("playerClass");
+
+// =======================
+// TILE CONFIG
+// =======================
+const TILE = 32;
+const MAP_W = 20;
+const MAP_H = 15;
+
+// 0 = grama, 1 = árvore
+const map = Array.from({ length: MAP_H }, () =>
+  Array.from({ length: MAP_W }, () =>
+    Math.random() < 0.18 ? 1 : 0
+  )
+);
+
+// =======================
+// PLAYER
+// =======================
+const player = {
+  x: 10,
+  y: 7,
+  hp: 100,
+  stamina: 100,
+  wood: 0,
+  herbs: 0,
+  className: "Indefinido"
+};
+
+// =======================
+// RESOURCES
+// =======================
+const resources = [];
+
+for (let i = 0; i < 12; i++) {
+  resources.push({
+    x: Math.floor(Math.random() * MAP_W),
+    y: Math.floor(Math.random() * MAP_H),
+    type: Math.random() < 0.5 ? "wood" : "herb"
+  });
+}
+
+// =======================
+// ENEMIES
+// =======================
+const enemies = [
+  { type: "wolf", x: 3, y: 3, hp: 30 },
+  { type: "wolf", x: 15, y: 10, hp: 30 },
+  { type: "bear", x: 8, y: 12, hp: 80 }
+];
+
+// =======================
+// DRAGON (BOSS)
+// =======================
+const dragon = {
+  x: 18,
+  y: 2,
+  hp: 300,
+  active: false
+};
+
+// =======================
+// INPUT
+// =======================
+const keys = {};
+window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+// =======================
+// GAME LOOP
+// =======================
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+// =======================
+// UPDATE
+// =======================
+function update() {
+  let dx = 0, dy = 0;
+
+  if (keys.w) dy = -1;
+  if (keys.s) dy = 1;
+  if (keys.a) dx = -1;
+  if (keys.d) dx = 1;
+
+  movePlayer(dx, dy);
+
+  if (keys.e) collectResource();
+  if (keys[" "]) attack();
+
+  updateEnemies();
+  updateClass();
+  updateHUD();
+}
+
+// =======================
+// MOVEMENT
+// =======================
+function movePlayer(dx, dy) {
+  const nx = player.x + dx;
+  const ny = player.y + dy;
+
+  if (map[ny]?.[nx] === 0) {
+    player.x = nx;
+    player.y = ny;
+    player.stamina = Math.max(0, player.stamina - 0.3);
+  } else {
+    player.stamina = Math.min(100, player.stamina + 0.2);
+  }
+}
+
+// =======================
+// RESOURCE COLLECTION
+// =======================
+function collectResource() {
+  for (let i = resources.length - 1; i >= 0; i--) {
+    const r = resources[i];
+    if (r.x === player.x && r.y === player.y) {
+      if (r.type === "wood") player.wood++;
+      if (r.type === "herb") player.herbs++;
+      resources.splice(i, 1);
+    }
+  }
+}
+
+// =======================
+// COMBAT
+// =======================
+function attack() {
+  enemies.forEach(e => {
+    if (
+      Math.abs(e.x - player.x) <= 1 &&
+      Math.abs(e.y - player.y) <= 1
+    ) {
+      e.hp -= 10;
+    }
+  });
+}
+
+// =======================
+// ENEMY AI
+// =======================
+function updateEnemies() {
+  enemies.forEach(e => {
+    if (Math.random() < 0.02) {
+      const dx = Math.sign(player.x - e.x);
+      const dy = Math.sign(player.y - e.y);
+      if (map[e.y + dy]?.[e.x + dx] === 0) {
+        e.x += dx;
+        e.y += dy;
+      }
+    }
+
+    if (e.x === player.x && e.y === player.y) {
+      player.hp -= e.type === "bear" ? 10 : 5;
+    }
+  });
+
+  // Ativa o dragão quando o jogador progride
+  if (player.wood >= 5 && !dragon.active) {
+    dragon.active = true;
+  }
+}
+
+// =======================
+// CLASS SYSTEM
+// =======================
+function updateClass() {
+  if (player.wood >= 5 && player.herbs < 5)
+    player.className = "Guerreiro / Bárbaro";
+
+  if (player.herbs >= 5 && player.wood < 5)
+    player.className = "Clérigo / Mago";
+
+  if (player.wood >= 5 && player.herbs >= 5)
+    player.className = "Paladino / Druida";
+}
+
+// =======================
+// DRAW
+// =======================
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // MAP
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      ctx.fillStyle = map[y][x] === 1 ? "#1e2f1e" : "#223b22";
+      ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+    }
+  }
+
+  // RESOURCES
+  resources.forEach(r => {
+    ctx.fillStyle = r.type === "wood" ? "#8b5a2b" : "#3cb371";
+    ctx.fillRect(r.x * TILE + 8, r.y * TILE + 8, 16, 16);
+  });
+
+  // PLAYER
+  ctx.fillStyle = "#ddd";
+  ctx.fillRect(player.x * TILE + 6, player.y * TILE + 6, 20, 20);
+
+  // ENEMIES
+  enemies.forEach(e => {
+    ctx.fillStyle = e.type === "wolf" ? "#999" : "#654321";
+    ctx.fillRect(e.x * TILE + 6, e.y * TILE + 6, 20, 20);
+  });
+
+  // DRAGON
+  if (dragon.active) {
+    ctx.fillStyle = "#8b0000";
+    ctx.fillRect(dragon.x * TILE, dragon.y * TILE, TILE, TILE);
+  }
+}
+
+// =======================
+// HUD
+// =======================
+function updateHUD() {
+  hpEl.innerText = Math.max(0, Math.floor(player.hp));
+  staminaEl.innerText = Math.floor(player.stamina);
+  woodEl.innerText = player.wood;
+  herbsEl.innerText = player.herbs;
+  classEl.innerText = player.className;
+}
+
+// START
+gameLoop();
+</script>
+
+</body>
+</html>
