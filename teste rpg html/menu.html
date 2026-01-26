@@ -98,16 +98,25 @@ body {
   </div>
 
   <script>
-    const newGameBtn = 
-    document.getElementById("newGame");
-    const continueBtn = 
-    document.getElementById("continueGame");
-    const hasSave = 
-    localStorage.getItem("saveData");
-    if(hasSave){
-        continueBtn.disabled = false;
-    }
-    newGameBtn
+   const newGameBtn = document.getElementById("newGame");
+const continueBtn = document.getElementById("continueGame");
+const hasSave = localStorage.getItem("saveData");
+if (hasSave) {
+  continueBtn.disabled = false;
+}
+newGameBtn.addEventListener("click", () => {
+  localStorage.removeItem("saveData");
+  window.location.href = "cutscene.html";
+});
+continueBtn.addEventListener("click", () => {
+  window.location.href = "cutscene.html";
+});
+
+const quotes =[
+    "A escuridão é tudo que você vê..",
+    "O que aconteceu?",
+    "Quem é você?"
+]
   </script>
 </body>
 </html>

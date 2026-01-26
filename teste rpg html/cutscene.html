@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HunterOfMyFate</title>
+    <style>
+  .cutscene {
+  position: fixed;
+  inset: 0;
+  background: black;
+  color: #d6d1c7;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Cinzel', serif;
+  text-align: center;
+  z-index: 999;
+}
+
+.cutscene p {
+  font-size: 1.4rem;
+  max-width: 600px;
+  line-height: 1.8;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.cutscene.show-text p {
+  opacity: 1;
+}
+
+.continue-hint {
+  margin-top: 40px;
+  font-size: 0.8rem;
+  opacity: 0.3;
+  letter-spacing: 2px;
+}
+
+.hidden {
+  display: none;
+}
+
+    </style>
+</head>
+<body>
+<div id="cutscene" class="cutscene hidden">
+  <p id="cutscene-text"></p>
+  <span class="continue-hint">[ Clique ou pressione qualquer tecla ]</span>
+</div>
+
+<canvas id="gameCanvas" width="640" height="480"></canvas>
+
+<script>
+ const cutscene = document.getElementById("cutscene");
+const textElement = document.getElementById("cutscene-text");
+
+const lines = [
+  "...",
+  "A escuridão é tudo que você vê...",
+  "O que aconteceu?",
+  "Quem é você?",
+  "Como veio parar aqui?",
+  "O que é esse lugar...",
+  "Vá e busque suas respostas..."
+];
+
+let index = 0;
+let canProceed = false;
+
+if (!localStorage.getItem("saveData")) {
+  cutscene.classList.remove("hidden");
+  showNextLine();
+}
+
+function showNextLine() {
+  textElement.style.opacity = 0;
+
+  setTimeout(() => {
+    textElement.textContent = lines[index];
+    cutscene.classList.add("show-text");
+    textElement.style.opacity = 1;
+  }, 500);
+
+  index++;
+
+  if (index >= lines.length) {
+    canProceed = true;
+  }
+}
+
+function proceed() {
+  if (!canProceed) {
+    showNextLine();
+  } else {
+    endCutscene();
+  }
+}
+
+document.addEventListener("click", proceed);
+document.addEventListener("keydown", proceed);
+
+function endCutscene() {
+  cutscene.classList.add("hidden");
+  localStorage.setItem("cutscenePlayed", "true");
+}
+
+</script>
+</body>
+</html>
