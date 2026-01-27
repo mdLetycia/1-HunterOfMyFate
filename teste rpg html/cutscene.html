@@ -62,7 +62,8 @@ const lines = [
   "O que aconteceu?",
   "Quem é você?",
   "Como veio parar aqui?",
-  "O que é esse lugar...",
+  "O que é esse lugar...?",
+  "são tantas perguntas...",
   "Vá e busque suas respostas..."
 ];
 
@@ -102,10 +103,9 @@ document.addEventListener("click", proceed);
 document.addEventListener("keydown", proceed);
 
 function endCutscene() {
-  cutscene.classList.add("hidden");
   localStorage.setItem("cutscenePlayed", "true");
+  window.location.href = "Character-creator.html";
 }
-
 </script>
 </body>
 </html>
