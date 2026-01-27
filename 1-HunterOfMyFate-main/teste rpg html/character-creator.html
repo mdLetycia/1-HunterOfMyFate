@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Criação de Personagem</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: radial-gradient(circle, #0b0b10, #000);
+  color: #e6e1d8;
+  font-family: 'Cinzel', serif;
+  display: flex;
+  height: 100vh;
+}
+
+.controls {
+  width: 360px;
+  padding: 30px;
+  border-right: 1px solid #2a2a2a;
+}
+
+.controls h2 {
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 6px;
+}
+
+select, input[type="color"] {
+  width: 100%;
+  height: 40px;
+  background: #141418;
+  color: #e6e1d8;
+  border: 1px solid #5a4a3b;
+}
+
+button {
+  margin-top: 30px;
+  width: 100%;
+  padding: 14px;
+  background: #5a1f1f;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #7a2a2a;
+}
+
+.preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas {
+  background: transparent;
+}
+</style>
+</head>
+
+<body>
+
+<!-- CONTROLES -->
+<div class="controls">
+  <h2>Aparência</h2>
+
+  <label>Gênero</label>
+  <select id="gender">
+    <option value="fem">Feminino</option>
+    <option value="masc">Masculino</option>
+  </select>
+
+  <label>Tom de pele</label>
+  <input type="color" id="skinColor" value="#c9a27d">
+
+  <label>Cor do cabelo</label>
+  <input type="color" id="hairColor" value="#2b1a12">
+
+  <button id="confirm">Confirmar</button>
+</div>
+
+<!-- PREVIEW -->
+<div class="preview">
+  <canvas id="canvas" width="256" height="256"></canvas>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const genderInput = document.getElementById("gender");
+const skinInput   = document.getElementById("skinColor");
+const hairInput   = document.getElementById("hairColor");
+const confirmBtn  = document.getElementById("confirm");
+
+/* SPRITES (URLS) */
+const faceImg = new Image();
+const hairImg = new Image();
+
+/* ===== FUNÇÃO DE TINT (MANTÉM SOMBRAS) ===== */
+function tint(img, color) {
+  ctx.drawImage(img, 0, 0);
+  ctx.globalCompositeOperation = "multiply";
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.globalCompositeOperation = "source-over";
+}
+
+/* ===== CARREGAR SPRITES POR GÊNERO ===== */
+function loadGenderSprites() {
+  faceImg.src =
+    genderInput.value === "fem"
+      ? "https://SEU_LINK_AQUI/face_fem_base.png"
+      : "https://SEU_LINK_AQUI/face_masc_base.png";
+
+  hairImg.src =
+    genderInput.value === "fem"
+      ? "https://SEU_LINK_AQUI/hair_fem_base.png"
+      : "https://SEU_LINK_AQUI/hair_masc_base.png";
+
+  Promise.all([
+    new Promise(r => faceImg.onload = r),
+    new Promise(r => hairImg.onload = r)
+  ]).then(drawCharacter);
+}
+
+/* ===== DESENHO FINAL (APENAS ROSTO) ===== */
+function drawCharacter() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  tint(faceImg, skinInput.value);
+  tint(hairImg, hairInput.value);
+}
+
+/* ===== EVENTOS ===== */
+[skinInput, hairInput].forEach(i =>
+  i.addEventListener("input", drawCharacter)
+);
+
+genderInput.addEventListener("change", loadGenderSprites);
+
+confirmBtn.addEventListener("click", () => {
+  const appearance = {
+    gender: genderInput.value,
+    skin: skinInput.value,
+    hair: hairInput.value
+  };
+
+  localStorage.setItem("playerAppearance", JSON.stringify(appearance));
+  window.location.href = "game.html";
+});
+
+/* ===== INIT ===== */
+loadGenderSprites();
+</script>
+
+</body>
+</html>
