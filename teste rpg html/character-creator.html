@@ -185,3 +185,238 @@ Promise.all([
 
 </body>
 </html>
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Character Creator</title>
+
+<style>
+body {
+  margin: 0;
+  background: #0b0b0e;
+  color: #e0dccc;
+  font-family: serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.hidden { display: none; }
+
+/* CUTSCENE */
+.cutscene {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 10;
+}
+
+.cutscene p {
+  font-size: 1.5rem;
+  max-width: 600px;
+  opacity: 0;
+  transition: opacity 1.5s;
+}
+
+/* CREATOR */
+.creator {
+  background: #141418;
+  padding: 30px;
+  border-radius: 10px;
+  width: 420px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.preview {
+  width: 120px;
+  height: 160px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+/* preview simples */
+.body {
+  width: 100%;
+  height: 100%;
+  background: #bbb;
+  border-radius: 20px;
+}
+
+.hair {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 40px;
+}
+
+.eyes {
+  position: absolute;
+  top: 55px;
+  left: 35px;
+  width: 50px;
+  height: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.eye {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #6e5c3e;
+  color: black;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #8a734f;
+}
+</style>
+</head>
+
+<body>
+
+<!-- CUTSCENE -->
+<div id="cutscene" class="cutscene">
+  <p id="cutsceneText">Você sente o frio da terra sob seus pés...</p>
+</div>
+
+<!-- CREATOR -->
+<div id="creator" class="creator hidden">
+  <h1>Quem é você?</h1>
+
+  <div class="preview">
+    <div id="body" class="body"></div>
+    <div id="hair" class="hair"></div>
+    <div class="eyes">
+      <div id="eye1" class="eye"></div>
+      <div id="eye2" class="eye"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Gênero</label>
+    <select id="gender">
+      <option value="fem">Feminino</option>
+      <option value="masc">Masculino</option>
+    </select>
+  </div>
+
+  <div class="section">
+    <label>Tom de pele</label>
+    <input type="color" id="skin" value="#bfbfbf">
+  </div>
+
+  <div class="section">
+    <label>Cabelo</label>
+    <input type="color" id="hairColor" value="#2b1a12">
+  </div>
+
+  <div class="section">
+    <label>Olhos</label>
+    <input type="color" id="eyesColor" value="#4aa3df">
+  </div>
+
+  <button id="confirm">Confirmar</button>
+</div>
+
+<script>
+/* CUTSCENE */
+const cutscene = document.getElementById("cutscene");
+const text = document.getElementById("cutsceneText");
+const creator = document.getElementById("creator");
+
+const lines = [
+  "Você sente o frio da terra sob seus pés...",
+  "Não lembra de quem é.",
+  "Nem como veio parar aqui.",
+  "Mas sua história ainda não acabou."
+];
+
+let i = 0;
+
+function nextLine() {
+  text.style.opacity = 0;
+  setTimeout(() => {
+    text.textContent = lines[i];
+    text.style.opacity = 1;
+    i++;
+    if (i >= lines.length) {
+      setTimeout(() => {
+        cutscene.classList.add("hidden");
+        creator.classList.remove("hidden");
+      }, 2000);
+    }
+  }, 500);
+}
+
+cutscene.addEventListener("click", nextLine);
+document.addEventListener("keydown", nextLine);
+nextLine();
+
+/* PREVIEW */
+const body = document.getElementById("body");
+const hair = document.getElementById("hair");
+const eye1 = document.getElementById("eye1");
+const eye2 = document.getElementById("eye2");
+
+const skinInput = document.getElementById("skin");
+const hairInput = document.getElementById("hairColor");
+const eyesInput = document.getElementById("eyesColor");
+
+function updatePreview() {
+  body.style.background = skinInput.value;
+  hair.style.background = hairInput.value;
+  eye1.style.background = eyesInput.value;
+  eye2.style.background = eyesInput.value;
+}
+
+skinInput.oninput = updatePreview;
+hairInput.oninput = updatePreview;
+eyesInput.oninput = updatePreview;
+updatePreview();
+
+/* CONFIRMAR */
+document.getElementById("confirm").onclick = () => {
+  const appearance = {
+    gender: document.getElementById("gender").value,
+    skin: skinInput.value,
+    hair: hairInput.value,
+    eyes: eyesInput.value
+  };
+
+  localStorage.setItem("playerAppearance", JSON.stringify(appearance));
+  window.location.href = "game.html";
+};
+</script>
+
+</body>
+</html>
