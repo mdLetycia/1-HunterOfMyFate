@@ -1,0 +1,58 @@
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const genderInput = document.getElementById("gender");
+const skinInput = document.getElementById("skinColor");
+const hairInput = document.getElementById("hairColor");
+const confirmBtn = document.getElementById("confirm");
+
+function drawCharacter() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // ===== CABEÇA =====
+  ctx.fillStyle = skinInput.value;
+  ctx.beginPath();
+  ctx.arc(128, 120, 60, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ===== OLHOS =====
+  ctx.fillStyle = "#000";
+  ctx.beginPath();
+  ctx.arc(110, 110, 5, 0, Math.PI * 2);
+  ctx.arc(146, 110, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ===== CABELO =====
+  ctx.fillStyle = hairInput.value;
+
+  if (genderInput.value === "fem") {
+    ctx.beginPath();
+    ctx.arc(128, 90, 70, Math.PI, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.fillRect(68, 50, 120, 40);
+  }
+}
+
+/* EVENTOS */
+[skinInput, hairInput].forEach(input =>
+  input.addEventListener("input", drawCharacter)
+);
+
+genderInput.addEventListener("change", drawCharacter);
+
+confirmBtn.addEventListener("click", () => {
+  const appearance = {
+    gender: genderInput.value,
+    skin: skinInput.value,
+    hair: hairInput.value
+  };
+
+  localStorage.setItem("playerAppearance", JSON.stringify(appearance));
+  alert("Personagem criado!");
+});
+
+/* INIT */
+drawCharacter();
+</script>
