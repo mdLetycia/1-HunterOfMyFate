@@ -1,58 +1,28 @@
-<script>
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-const genderInput = document.getElementById("gender");
-const skinInput = document.getElementById("skinColor");
-const hairInput = document.getElementById("hairColor");
-const confirmBtn = document.getElementById("confirm");
-
 function drawCharacter() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // ===== CABEÇA =====
+  // CENTRO DO CANVAS
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // TAMANHO DA CABEÇA
+  const faceSize = 400;
+
+  // POSIÇÃO FINAL (centralizado)
+  const drawX = centerX - faceSize / 2;
+  const drawY = centerY - faceSize / 2;
+
+  // PELE
+  ctx.drawImage(faceImg, drawX, drawY, faceSize, faceSize);
+  ctx.globalCompositeOperation = "multiply";
   ctx.fillStyle = skinInput.value;
-  ctx.beginPath();
-  ctx.arc(128, 120, 60, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillRect(drawX, drawY, faceSize, faceSize);
+  ctx.globalCompositeOperation = "source-over";
 
-  // ===== OLHOS =====
-  ctx.fillStyle = "#000";
-  ctx.beginPath();
-  ctx.arc(110, 110, 5, 0, Math.PI * 2);
-  ctx.arc(146, 110, 5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // ===== CABELO =====
+  // CABELO
+  ctx.drawImage(hairImg, drawX, drawY, faceSize, faceSize);
+  ctx.globalCompositeOperation = "multiply";
   ctx.fillStyle = hairInput.value;
-
-  if (genderInput.value === "fem") {
-    ctx.beginPath();
-    ctx.arc(128, 90, 70, Math.PI, Math.PI * 2);
-    ctx.fill();
-  } else {
-    ctx.fillRect(68, 50, 120, 40);
-  }
+  ctx.fillRect(drawX, drawY, faceSize, faceSize);
+  ctx.globalCompositeOperation = "source-over";
 }
-
-/* EVENTOS */
-[skinInput, hairInput].forEach(input =>
-  input.addEventListener("input", drawCharacter)
-);
-
-genderInput.addEventListener("change", drawCharacter);
-
-confirmBtn.addEventListener("click", () => {
-  const appearance = {
-    gender: genderInput.value,
-    skin: skinInput.value,
-    hair: hairInput.value
-  };
-
-  localStorage.setItem("playerAppearance", JSON.stringify(appearance));
-  alert("Personagem criado!");
-});
-
-/* INIT */
-drawCharacter();
-</script>
